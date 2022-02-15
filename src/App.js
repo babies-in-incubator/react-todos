@@ -1,80 +1,43 @@
-import { NavLink, Route, Routes, useParams } from "react-router-dom";
+import Nav from "./Nav";
+import { useEffect, useState } from "react";
+import Article from "./Article";
+
+const Loading = () => <div>Now Loading...</div>;
 
 const App = () => {
-  const contents = [
-    { id: 1, title: "HTML", desc: "HTML is..." },
-    { id: 2, title: "JS", desc: "JS is..." },
-    { id: 3, title: "React", desc: "React is..." },
-  ];
+  const [article, setArticle] = useState({
+    id: 0,
+    title: "Welcome",
+    desc: "Hello, React & Ajax",
+  });
+  const [list, setList] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("list.json")
+      .then((res) => res.json())
+      .then((json) => setList(json))
+      .then(() => setLoading(false));
+  }, []);
+
   return (
     <div className="App">
-      <h1>Hello, React Router DOM!</h1>
-      <ul>
-        <li>
-          <NavLink to={"/"}>Home</NavLink>
-        </li>
-        <li>
-          <NavLink to={"/topics"}>Topics</NavLink>
-        </li>
-        <li>
-          <NavLink to={"/contact"}>Contact</NavLink>
-        </li>
-      </ul>
-      <Routes>
-        <Route path={"/"} element={<Home />} />
-        <Route path={"/topics/*"} element={<Topics contents={contents} />} />
-        <Route path={"/contact"} element={<Contact />} />
-        <Route path={"*"} element={<>Not Found</>} />
-      </Routes>
-    </div>
-  );
-};
-
-const Home = () => {
-  return (
-    <div>
-      <h2>Home</h2>Home...
-    </div>
-  );
-};
-
-const Topics = (props) => {
-  const { contents } = props;
-  const navLinkList = contents.map((el) => (
-    <li key={el.id}>
-      <NavLink to={"/topics/" + el.id}>{el.title}</NavLink>
-    </li>
-  ));
-
-  return (
-    <div>
-      <h2>Topics</h2>
-      <ul>{navLinkList}</ul>
-      <Routes>
-        <Route path={"/:id"} element={<Topic contents={contents} />} />
-      </Routes>
-    </div>
-  );
-};
-
-const Topic = (props) => {
-  const { contents } = props;
-  const params = useParams();
-  const { id } = params;
-  const idx = contents.map((el) => el.id).indexOf(parseInt(id));
-  const content = contents[idx];
-  return (
-    <div>
-      <h3>{content.title}</h3>
-      {content.desc}
-    </div>
-  );
-};
-
-const Contact = () => {
-  return (
-    <div>
-      <h2>Contact</h2>Contact...
+      <h1>WEB</h1>
+      {loading ? (
+        <Loading />
+      ) : (
+        <>
+          <Nav
+            list={list}
+            onClick={(id) => {
+              fetch(id + ".json")
+                .then((res) => res.json())
+                .then((json) => setArticle({ ...json }));
+            }}
+          />
+          <Article title={article.title} desc={article.desc} />
+        </>
+      )}
     </div>
   );
 };
